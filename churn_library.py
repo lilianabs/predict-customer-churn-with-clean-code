@@ -1,7 +1,34 @@
 # library doc string
+'''
+Testing & Logging exercise solution
+
+author: Liliana B
+date: March 22, 2022
+'''
+
+import logging
+logging.basicConfig(
+    filename='logs/churn_library.log',
+    level=logging.INFO,
+    filemode='w',
+    format='%(name)s - %(levelname)s - %(message)s')
 
 
-# import libraries
+import shap
+import joblib
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns; sns.set()
+
+from sklearn.preprocessing import normalize
+from sklearn.model_selection import train_test_split
+
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import GridSearchCV
+
+from sklearn.metrics import plot_roc_curve, classification_report
 
 
 
@@ -15,7 +42,12 @@ def import_data(pth):
     output:
             df: pandas dataframe
     '''	
-	pass
+    try:
+        df = pd.read_csv(pth)
+        logging.info("Loading CSV file: SUCCESS")
+        return df
+    except FileNotFoundError:
+        logging.error("import_data: CSV file not found: " + pth)
 
 
 def perform_eda(df):
@@ -27,7 +59,7 @@ def perform_eda(df):
     output:
             None
     '''
-	pass
+    pass
 
 
 def encoder_helper(df, category_lst, response):
@@ -107,3 +139,6 @@ def train_models(X_train, X_test, y_train, y_test):
               None
     '''
     pass
+
+if __name__ == "__main__":
+    df = import_data("data/bank_data.csv")
