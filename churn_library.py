@@ -1,6 +1,5 @@
-# library doc string
 '''
-Testing & Logging exercise solution
+Churn library
 
 author: Liliana B
 date: March 22, 2022
@@ -31,8 +30,6 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import plot_roc_curve, classification_report
 
 
-
-
 def import_data(pth):
     '''
     returns dataframe for the csv found at pth
@@ -53,7 +50,7 @@ def import_data(pth):
 def plot_numeric_feature(feature):
     '''
     plots a histplot (numeric feature) 
-    and save figure to images folder
+    and saves figure to images folder
     
     input:
           feature: pandas series
@@ -69,7 +66,7 @@ def plot_numeric_feature(feature):
 def plot_categoric_feature(feature):
     '''
     plots a bar plot (categoric feature) 
-    and save figure to images folder
+    and saves figure to images folder
     
     input:
           feature: pandas series
@@ -85,7 +82,7 @@ def plot_categoric_feature(feature):
 def plot_correlation(df):
     '''
     plots a correlation heatmap of numeric features
-    and save figure to images folder
+    and saves figure to images folder
 
     input: 
           df: pandas dataframe
@@ -98,18 +95,18 @@ def plot_correlation(df):
     plt.savefig('images/Correlation_heatmap.jpg') 
 
 
-def perform_eda(df):
+def perform_eda(churn_df):
     '''
-    perform eda on df
+    performs eda on df and saves figures to images folder
     input:
             df: pandas dataframe
 
     output:
             None
     '''
-    # Add Churn column to the dataframe
     try:
-        df['Churn'] = df['Attrition_Flag'].apply(lambda val: 0 if val == "Existing Customer" else 1)
+        # Add Churn column to the dataframe
+        churn_df['Churn'] = churn_df['Attrition_Flag'].apply(lambda val: 0 if val == "Existing Customer" else 1)
         logging.info("Added Churn column to dataframe")
     except:
         logging.error("Could not add Churn column to dataframe")
@@ -120,7 +117,7 @@ def perform_eda(df):
     # Plot numeric columns and save images
     for feature in numeric_features:
         try:
-            plot_numeric_feature(df[feature])
+            plot_numeric_feature(churn_df[feature])
             logging.info("Numeric plot stored: " + feature)
         except:
             logging.error("Clould not store numeric plot: " + feature)
@@ -128,14 +125,14 @@ def perform_eda(df):
     # Plot categoric columns and save images
     for feature in categoric_features:
         try:
-            plot_categoric_feature(df[feature])
+            plot_categoric_feature(churn_df[feature])
             logging.info("Categoric plot stored: " + feature)
         except:
             logging.error("Could not store categoric plot: " + feature)
 
     # Plot correlation heatmap
     try:
-        plot_correlation(df)
+        plot_correlation(churn_df)
         logging.info("Correlation plot stored")
     except:
         logging.error("Could not store correlation plot")
@@ -220,6 +217,6 @@ def train_models(X_train, X_test, y_train, y_test):
     '''
     pass
 
-if __name__ == "__main__":
-    df = import_data("data/bank_data.csv")
-    perform_eda(df)
+#if __name__ == "__main__":
+#    df = import_data("data/bank_data.csv")
+#    perform_eda(df)
