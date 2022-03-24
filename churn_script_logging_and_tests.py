@@ -1,7 +1,7 @@
 '''
 Testing & Logging exercise solution
 
-author: Liliana B
+author: Liliana Badillo
 date: March 22, 2022
 '''
 import os
@@ -49,11 +49,11 @@ def test_eda(perform_eda):
     try:
         perform_eda(churn_df)
         images_folder = "images/"
-        images_files = ["Churn.jpg", "Correlation_heatmap.jpg",
-                        "Customer_Age.jpg", "Marital_Status.jpg",
-                        "Total_Trans_Ct.jpg"]
+        images_files_lst = ["Churn.jpg", "Correlation_heatmap.jpg",
+                            "Customer_Age.jpg", "Marital_Status.jpg",
+                            "Total_Trans_Ct.jpg"]
 
-        for file in images_files:
+        for file in images_files_lst:
             assert os.path.isfile(images_folder + file)
 
         logging.info("Testing perform_eda: SUCCESS")
@@ -67,6 +67,24 @@ def test_encoder_helper(encoder_helper):
     '''
     test encoder helper
     '''
+    try:
+        churn_df = cl.import_data("./data/bank_data.csv")
+        logging.info("Testing encoder_helper: loading data: SUCCESS")
+    except FileNotFoundError as err:
+        logging.error("Testing encoder_helper: The file wasn't found")
+        raise err
+
+    category_lst = ['Gender', 'Education_Level', 'Marital_Status', 'Income_Category',
+                    'Card_Category']
+    response = "_Churn"
+
+    try:
+        encoder_helper(churn_df, category_lst, response)
+        logging.info(
+            "Testing encoder_helper: adding categorical features: SUCCESS")
+    except BaseException:
+        logging.error(
+            "Testing encoder_helper: error adding categorical features")
 
 
 def test_perform_feature_engineering(perform_feature_engineering):
@@ -84,3 +102,4 @@ def test_train_models(train_models):
 if __name__ == "__main__":
     test_import(cl.import_data)
     test_eda(cl.perform_eda)
+    test_encoder_helper(cl.encoder_helper)

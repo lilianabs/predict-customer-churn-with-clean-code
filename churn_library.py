@@ -1,7 +1,7 @@
 '''
 Churn library
 
-author: Liliana B
+author: Liliana Badillo
 date: March 22, 2022
 '''
 
@@ -41,7 +41,7 @@ def import_data(pth):
     '''	
     try:
         df = pd.read_csv(pth)
-        logging.info("Loading CSV file: SUCCESS")
+        logging.info("import_data: Loading CSV file SUCCESS")
         return df
     except FileNotFoundError:
         logging.error("import_data: CSV file not found: " + pth)
@@ -107,15 +107,15 @@ def perform_eda(churn_df):
     try:
         # Add Churn column to the dataframe
         churn_df['Churn'] = churn_df['Attrition_Flag'].apply(lambda val: 0 if val == "Existing Customer" else 1)
-        logging.info("Added Churn column to dataframe")
+        logging.info("perform_eda: Added Churn column to dataframe")
     except:
-        logging.error("Could not add Churn column to dataframe")
+        logging.error("perform_eda: Could not add Churn column to dataframe")
 
-    numeric_features = ["Churn", "Customer_Age", "Total_Trans_Ct"]
-    categoric_features = ["Marital_Status"]
+    numeric_features_lst = ["Churn", "Customer_Age", "Total_Trans_Ct"]
+    categoric_features_lst = ["Marital_Status"]
 
     # Plot numeric columns and save images
-    for feature in numeric_features:
+    for feature in numeric_features_lst:
         try:
             plot_numeric_feature(churn_df[feature])
             logging.info("Numeric plot stored: " + feature)
@@ -123,7 +123,7 @@ def perform_eda(churn_df):
             logging.error("Clould not store numeric plot: " + feature)
     
     # Plot categoric columns and save images
-    for feature in categoric_features:
+    for feature in categoric_features_lst:
         try:
             plot_categoric_feature(churn_df[feature])
             logging.info("Categoric plot stored: " + feature)
@@ -139,20 +139,36 @@ def perform_eda(churn_df):
 
 
 
-def encoder_helper(df, category_lst, response):
+def encoder_helper(churn_df, category_lst, response):
     '''
     helper function to turn each categorical column into a new column with
     propotion of churn for each category - associated with cell 15 from the notebook
 
     input:
-            df: pandas dataframe
+            churn_df: pandas dataframe
             category_lst: list of columns that contain categorical features
             response: string of response name [optional argument that could be used for naming variables or index y column]
 
     output:
-            df: pandas dataframe with new columns for
+            churn_df: pandas dataframe with new columns
     '''
-    pass
+    try:
+        # Add Churn column to the dataframe
+        churn_df['Churn'] = churn_df['Attrition_Flag'].apply(lambda val: 0 if val == "Existing Customer" else 1)
+        logging.info("encoder_helper: Added Churn column to dataframe")
+    except:
+        logging.error("encoder_helper: Could not add Churn column to dataframe")
+         
+    for category in category_lst:
+        try:
+            category_groups = churn_df.groupby(category).mean()['Churn']
+            category_new_feature = [category_groups.loc[val] for val in churn_df[category]]
+            churn_df[category + response] = category_new_feature
+            logging.info("encoder_helper: Added new categorical column " + category + response)
+        except:
+            logging.error("encoder_helper: Could not add categorical column: " + category + response)
+    
+    return churn_df
 
 
 def perform_feature_engineering(df, response):
@@ -220,3 +236,9 @@ def train_models(X_train, X_test, y_train, y_test):
 #if __name__ == "__main__":
 #    df = import_data("data/bank_data.csv")
 #    perform_eda(df)
+#    category_lst = ['Gender', 'Education_Level', 'Marital_Status', 'Income_Category',
+#                     'Card_Category'
+#    ]
+#    response = "_Churn"
+#    encoder_helper(df, category_lst, response)
+#    print(df.info())
