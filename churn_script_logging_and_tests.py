@@ -76,21 +76,58 @@ def test_encoder_helper(encoder_helper):
 
     category_lst = ['Gender', 'Education_Level', 'Marital_Status', 'Income_Category',
                     'Card_Category']
-    response = "_Churn"
+    response = "Churn"
 
     try:
-        encoder_helper(churn_df, category_lst, response)
+        # Get number of original columns
+        num_cols_churn_df = churn_df.shape[1]
+        churn_df = encoder_helper(churn_df, category_lst, response)
+
+        # Check that we have all of the new categoric columns and the response
+        assert churn_df.shape[1] == (num_cols_churn_df + len(category_lst) + 1)
+
         logging.info(
-            "Testing encoder_helper: adding categorical features: SUCCESS")
-    except BaseException:
+            "Testing encoder_helper: correct number of columns: SUCCESS")
+    except AssertionError as err:
         logging.error(
-            "Testing encoder_helper: error adding categorical features")
+            "Testing encoder_helper: error not enough categorical features")
+        raise err
 
 
 def test_perform_feature_engineering(perform_feature_engineering):
     '''
     test perform_feature_engineering
     '''
+    try:
+        churn_df = cl.import_data("./data/bank_data.csv")
+        logging.info(
+            "Testing perform_feature_engineering: loading data: SUCCESS")
+    except FileNotFoundError as err:
+        logging.error(
+            "Testing perform_feature_engineering: The file wasn't found")
+        raise err
+
+    response = "Churn"
+
+    try:
+        x_train, x_test, y_train, y_test = perform_feature_engineering(
+            churn_df, response)
+
+        assert x_train.shape[0] > 0
+        assert x_train.shape[1] > 0
+
+        assert x_test.shape[0] > 0
+        assert x_test.shape[1] > 0
+
+        assert y_train.shape[0] == x_train.shape[0]
+        assert y_test.shape[0] == x_test.shape[0]
+
+        logging.info(
+            "Testing perform_feature_engineering: created features for training: SUCCESS")
+    except AssertionError as err:
+        logging.error(
+            "Testing perform_feature_engineering: error creating features for training")
+        raise err
 
 
 def test_train_models(train_models):
@@ -103,3 +140,4 @@ if __name__ == "__main__":
     test_import(cl.import_data)
     test_eda(cl.perform_eda)
     test_encoder_helper(cl.encoder_helper)
+    test_perform_feature_engineering(cl.perform_feature_engineering)
