@@ -134,6 +134,41 @@ def test_train_models(train_models):
     '''
     test train_models
     '''
+    try:
+        churn_df = cl.import_data("./data/bank_data.csv")
+        logging.info(
+            "Testing train_models: loading data: SUCCESS")
+    except FileNotFoundError as err:
+        logging.error(
+            "Testing train_models: The file wasn't found")
+        raise err
+
+    response = "Churn"
+
+    try:
+        x_train, x_test, y_train, y_test = cl.perform_feature_engineering(
+            churn_df, response)
+
+        train_models(x_train, x_test, y_train, y_test)
+
+        # Check the ROC curve plot was stored
+        images_folder = "images/"
+        assert os.path.isfile(images_folder + "roc_curve.jpg")
+
+        # Check the models were stored
+        models_folder = "models/"
+        models_lst = ["logistic_model.pkl", "rfc_model.pkl"]
+        for model in models_lst:
+            assert os.path.isfile(models_folder + model)
+
+        logging.info(
+            "Testing train_models: created models and stored roc curve plot: SUCCESS")
+    except AssertionError as err:
+        logging.error(
+            "Testing train_models: error training models and storing roc curve plot ")
+        raise err
+
+
 
 
 if __name__ == "__main__":
@@ -141,3 +176,4 @@ if __name__ == "__main__":
     test_eda(cl.perform_eda)
     test_encoder_helper(cl.encoder_helper)
     test_perform_feature_engineering(cl.perform_feature_engineering)
+    test_train_models(cl.train_models)

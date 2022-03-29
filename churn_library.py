@@ -263,7 +263,28 @@ def feature_importance_plot(model, X_data, output_pth):
     pass
 
 
-def train_models(X_train, X_test, y_train, y_test):
+
+def plot_roc(lrc, cv_rfc, x_test, y_test):
+    '''
+    plots an ROC curve of the models
+    and saves figure to images folder
+
+    input:
+          models: list of models
+          x_test: features of test data
+          y_test: predictions of test data
+    output:
+          None
+    '''
+    plt.figure(figsize=(20, 10))
+    lrc_plot = plot_roc_curve(lrc, x_test, y_test)
+    ax = plt.gca()
+    rfc_disp = plot_roc_curve(cv_rfc.best_estimator_, x_test, y_test, ax=ax, alpha=0.8)
+    plt.title("ROC Curve model comparison")
+    plt.savefig('images/{}.jpg'.format("roc_curve"))
+
+
+def train_models(x_train, x_test, y_train, y_test):
     '''
     train, store model results: images + scores, and store models
     input:
@@ -274,15 +295,53 @@ def train_models(X_train, X_test, y_train, y_test):
     output:
               None
     '''
-    pass
+    try:
+        rfc = RandomForestClassifier(random_state=42)
+        lrc = LogisticRegression(solver='liblinear')
 
-# if __name__ == "__main__":
-#    df = import_data("data/bank_data.csv")
-#    perform_eda(df)
-#    category_lst = ['Gender', 'Education_Level', 'Marital_Status', 'Income_Category',
-#                     'Card_Category'
-#    ]
-#    response = "Churn"
-#    encoder_helper(df, category_lst, response)
-#    print(df.info())
-#    print(df.head())
+        param_grid = { 
+            'n_estimators': [200, 500],
+            'max_features': ['auto', 'sqrt'],
+            'max_depth' : [4,5,100],
+            'criterion' :['gini', 'entropy']
+        }
+
+        cv_rfc = GridSearchCV(estimator=rfc, param_grid=param_grid, cv=5)
+        cv_rfc.fit(x_train, y_train)
+
+        lrc.fit(x_train, y_train)
+        logging.info("train_models: Training moodels SUCCESS")
+
+    except Exception as err:
+        logging.error(
+            "train_models: Error while training model %s ", err)
+
+    try:
+        plot_roc(lrc, cv_rfc, x_test, y_test)
+        logging.info("train_models: ROC curve plot stored")
+    except Exception as err:
+        logging.error("Could not store ROC curve plot: %s", err)
+
+    try:
+        joblib.dump(cv_rfc.best_estimator_, 'models/rfc_model.pkl')
+        joblib.dump(lrc, 'models/logistic_model.pkl')
+        logging.info("train_models: Models stored")
+    except Exception as err:
+        logging.error("train_models: Could not store models: %s", err)
+    
+
+    
+ 
+
+
+if __name__ == "__main__":
+   df = import_data("data/bank_data.csv")
+   perform_eda(df)
+   category_lst = ['Gender', 'Education_Level', 'Marital_Status', 'Income_Category',
+                    'Card_Category'
+   ]
+   response = "Churn"
+   df = encoder_helper(df, category_lst, response)
+
+   x_train, x_test, y_train, y_test = perform_feature_engineering(df, response)
+   train_models(x_train, x_test, y_train, y_test)

@@ -1,0 +1,43 @@
+root - INFO - import_data: Loading CSV file SUCCESS
+root - INFO - Testing import_data: SUCCESS
+root - INFO - import_data: Loading CSV file SUCCESS
+root - INFO - Testing perform_eda loading data: SUCCESS
+root - INFO - perform_eda: Added Churn column to dataframe
+root - INFO - Numeric plot stored: Churn
+root - INFO - Numeric plot stored: Customer_Age
+root - INFO - Numeric plot stored: Total_Trans_Ct
+root - INFO - Categoric plot stored: Marital_Status
+root - INFO - Correlation plot stored
+root - INFO - Testing perform_eda: SUCCESS
+root - INFO - import_data: Loading CSV file SUCCESS
+root - INFO - Testing encoder_helper: loading data: SUCCESS
+root - INFO - encoder_helper: Added Churn column to dataframe
+root - INFO - encoder_helper: Added new categorical column GenderChurn
+root - INFO - encoder_helper: Added new categorical column Education_LevelChurn
+root - INFO - encoder_helper: Added new categorical column Marital_StatusChurn
+root - INFO - encoder_helper: Added new categorical column Income_CategoryChurn
+root - INFO - encoder_helper: Added new categorical column Card_CategoryChurn
+root - INFO - Testing encoder_helper: correct number of columns: SUCCESS
+root - INFO - import_data: Loading CSV file SUCCESS
+root - INFO - Testing perform_feature_engineering: loading data: SUCCESS
+root - INFO - perform_feature_engineering: Added Churn column to dataframe
+root - INFO - encoder_helper: Added Churn column to dataframe
+root - INFO - encoder_helper: Added new categorical column GenderChurn
+root - INFO - encoder_helper: Added new categorical column Education_LevelChurn
+root - INFO - encoder_helper: Added new categorical column Marital_StatusChurn
+root - INFO - encoder_helper: Added new categorical column Income_CategoryChurn
+root - INFO - encoder_helper: Added new categorical column Card_CategoryChurn
+root - INFO - Testing perform_feature_engineering: created features for training: SUCCESS
+root - INFO - import_data: Loading CSV file SUCCESS
+root - INFO - Testing train_models: loading data: SUCCESS
+root - INFO - perform_feature_engineering: Added Churn column to dataframe
+root - INFO - encoder_helper: Added Churn column to dataframe
+root - INFO - encoder_helper: Added new categorical column GenderChurn
+root - INFO - encoder_helper: Added new categorical column Education_LevelChurn
+root - INFO - encoder_helper: Added new categorical column Marital_StatusChurn
+root - INFO - encoder_helper: Added new categorical column Income_CategoryChurn
+root - INFO - encoder_helper: Added new categorical column Card_CategoryChurn
+root - INFO - train_models: Training moodels SUCCESS
+root - INFO - train_models: ROC curve plot stored
+root - INFO - train_models: Models stored
+root - INFO - Testing train_models: created models and stored roc curve plot: SUCCESS
