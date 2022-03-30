@@ -17,7 +17,7 @@ To run this project locally, follow the next steps:
     conda create --name {env_name} python==3.8
     ```
 
-    Note: Set a name for the env_name variable.
+    **Note:** Set a name for the env_name variable.
 
 2. Activate the conda environment:
 
