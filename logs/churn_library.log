@@ -27,6 +27,7 @@ root - INFO - encoder_helper: Added new categorical column Education_LevelChurn
 root - INFO - encoder_helper: Added new categorical column Marital_StatusChurn
 root - INFO - encoder_helper: Added new categorical column Income_CategoryChurn
 root - INFO - encoder_helper: Added new categorical column Card_CategoryChurn
+root - INFO - perform_feature_engineering: Created train and test datasets
 root - INFO - Testing perform_feature_engineering: created features for training: SUCCESS
 root - INFO - import_data: Loading CSV file SUCCESS
 root - INFO - Testing train_models: loading data: SUCCESS
@@ -37,7 +38,32 @@ root - INFO - encoder_helper: Added new categorical column Education_LevelChurn
 root - INFO - encoder_helper: Added new categorical column Marital_StatusChurn
 root - INFO - encoder_helper: Added new categorical column Income_CategoryChurn
 root - INFO - encoder_helper: Added new categorical column Card_CategoryChurn
+root - INFO - perform_feature_engineering: Created train and test datasets
 root - INFO - train_models: Training moodels SUCCESS
 root - INFO - train_models: ROC curve plot stored
 root - INFO - train_models: Models stored
 root - INFO - Testing train_models: created models and stored roc curve plot: SUCCESS
+root - INFO - import_data: Loading CSV file SUCCESS
+root - INFO - Testing feature_importance_plot: loading data: SUCCESS
+root - INFO - perform_feature_engineering: Added Churn column to dataframe
+root - INFO - encoder_helper: Added Churn column to dataframe
+root - INFO - encoder_helper: Added new categorical column GenderChurn
+root - INFO - encoder_helper: Added new categorical column Education_LevelChurn
+root - INFO - encoder_helper: Added new categorical column Marital_StatusChurn
+root - INFO - encoder_helper: Added new categorical column Income_CategoryChurn
+root - INFO - encoder_helper: Added new categorical column Card_CategoryChurn
+root - INFO - perform_feature_engineering: Created train and test datasets
+root - INFO - feature_importance_plot: Stored feature_importance_plot
+root - INFO - Testing feature_importance_plot: created feature importance plot: SUCCESS
+root - INFO - Testing feature_importance_plot: stored feature importance plot: SUCCESS
+root - INFO - import_data: Loading CSV file SUCCESS
+root - INFO - Testing classification_report_image: loading data: SUCCESS
+root - INFO - perform_feature_engineering: Added Churn column to dataframe
+root - INFO - encoder_helper: Added Churn column to dataframe
+root - INFO - encoder_helper: Added new categorical column GenderChurn
+root - INFO - encoder_helper: Added new categorical column Education_LevelChurn
+root - INFO - encoder_helper: Added new categorical column Marital_StatusChurn
+root - INFO - encoder_helper: Added new categorical column Income_CategoryChurn
+root - INFO - encoder_helper: Added new categorical column Card_CategoryChurn
+root - INFO - perform_feature_engineering: Created train and test datasets
+root - INFO - Testing classification_report_image: stored classification report images: SUCCESS

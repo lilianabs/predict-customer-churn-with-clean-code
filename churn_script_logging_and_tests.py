@@ -6,6 +6,7 @@ date: March 22, 2022
 '''
 import os
 import logging
+import joblib
 import churn_library as cl
 
 logging.basicConfig(
@@ -169,6 +170,100 @@ def test_train_models(train_models):
         raise err
 
 
+def test_feature_importance_plot(feature_importance_plot):
+    '''
+    test feature_importance_plot
+    '''
+    try:
+        churn_df = cl.import_data("./data/bank_data.csv")
+        logging.info(
+            "Testing feature_importance_plot: loading data: SUCCESS")
+    except FileNotFoundError as err:
+        logging.error(
+            "Testing feature_importance_plot: The file wasn't found")
+        raise err
+
+    response = "Churn"
+
+    try:
+        x_train, x_test, y_train, y_test = cl.perform_feature_engineering(
+            churn_df, response)
+
+        # Load the model
+        models_folder = "models/"
+        rfc_model = joblib.load(models_folder + 'rfc_model.pkl')
+
+        # Create the feature importance model
+        feature_importance_plot(rfc_model, x_train, "images")
+        logging.info(
+            "Testing feature_importance_plot: created feature importance plot: SUCCESS")
+
+        # Check the feature importance plot was stored
+        images_folder = "images/"
+        assert os.path.isfile(images_folder + "feature_importance.jpg")
+
+        logging.info(
+            "Testing feature_importance_plot: stored feature importance plot: SUCCESS")
+    except AssertionError as err:
+        logging.error(
+            "Testing feature_importance_plot: error creating feature importance plot %s", err)
+        raise err
+
+
+
+    pass
+
+def test_classification_report_image(classification_report_image):
+    '''
+    test classification_report_image
+    '''
+    try:
+        churn_df = cl.import_data("./data/bank_data.csv")
+        logging.info(
+            "Testing classification_report_image: loading data: SUCCESS")
+    except FileNotFoundError as err:
+        logging.error(
+            "Testing classification_report_image: The file wasn't found")
+        raise err
+
+    response = "Churn"
+
+    try:
+        x_train, x_test, y_train, y_test = cl.perform_feature_engineering(
+            churn_df, response)
+
+        # Load the model
+        models_folder = "models/"
+        rfc_model = joblib.load(models_folder + 'rfc_model.pkl')
+        lr_model = joblib.load(models_folder + 'logistic_model.pkl')
+
+        y_train_preds_rf = rfc_model.predict(x_train)
+        y_test_preds_rf = rfc_model.predict(x_test)
+
+        y_train_preds_lr = lr_model.predict(x_train)
+        y_test_preds_lr = lr_model.predict(x_test)
+
+        predictions = {"y_train_preds_rf": y_train_preds_rf,
+                       "y_test_preds_rf": y_test_preds_rf,
+                       "y_train_preds_lr": y_train_preds_lr,
+                       "y_test_preds_lr": y_test_preds_lr,
+                       "y_train": y_train,
+                       "y_test": y_test}
+
+        classification_report_image(**predictions)
+
+        # Check the classification report images were stored
+        images_folder = "images/"
+        assert os.path.isfile(images_folder + "classification_report_lr.jpg")
+        assert os.path.isfile(images_folder + "classification_report_rf.jpg")
+
+        logging.info(
+            "Testing classification_report_image: stored classification report images: SUCCESS")
+    except AssertionError as err:
+        logging.error(
+            "Testing classification_report_image: error creating classification report image %s", err)
+        raise err
+
 
 
 if __name__ == "__main__":
@@ -177,3 +272,5 @@ if __name__ == "__main__":
     test_encoder_helper(cl.encoder_helper)
     test_perform_feature_engineering(cl.perform_feature_engineering)
     test_train_models(cl.train_models)
+    test_feature_importance_plot(cl.feature_importance_plot)
+    test_classification_report_image(cl.classification_report_image)

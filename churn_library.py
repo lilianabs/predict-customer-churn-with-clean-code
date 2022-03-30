@@ -198,58 +198,71 @@ def perform_feature_engineering(churn_df, response):
             lambda val: 0 if val == "Existing Customer" else 1)
         logging.info(
             "perform_feature_engineering: Added Churn column to dataframe")
+
+        predictor = churn_df[response]
+
+        category_lst = ['Gender', 'Education_Level', 'Marital_Status', 'Income_Category',
+                        'Card_Category']
+
+        churn_df = encoder_helper(churn_df, category_lst, response)
+
+        keep_cols = ['Customer_Age', 'Dependent_count', 'Months_on_book',
+                     'Total_Relationship_Count', 'Months_Inactive_12_mon',
+                     'Contacts_Count_12_mon', 'Credit_Limit', 'Total_Revolving_Bal',
+                     'Avg_Open_To_Buy', 'Total_Amt_Chng_Q4_Q1', 'Total_Trans_Amt',
+                     'Total_Trans_Ct', 'Total_Ct_Chng_Q4_Q1', 'Avg_Utilization_Ratio']
+
+        new_categoric_cols = [category + "_" +
+                              response for category in category_lst]
+
+        features = churn_df[keep_cols + new_categoric_cols]
+
+        x_train, x_test, y_train, y_test = train_test_split(
+            features, predictor, test_size=0.3, random_state=42)
+
+        logging.info("perform_feature_engineering: Created train and test datasets")
+
     except Exception as err:
         logging.error(
-            "perform_feature_engineering: Could not add Churn column to dataframe %s ", err)
-
-    predictor = churn_df[response]
-
-    category_lst = ['Gender', 'Education_Level', 'Marital_Status', 'Income_Category',
-                    'Card_Category']
-
-    churn_df = encoder_helper(churn_df, category_lst, response)
-
-    keep_cols = ['Customer_Age', 'Dependent_count', 'Months_on_book',
-                 'Total_Relationship_Count', 'Months_Inactive_12_mon',
-                 'Contacts_Count_12_mon', 'Credit_Limit', 'Total_Revolving_Bal',
-                 'Avg_Open_To_Buy', 'Total_Amt_Chng_Q4_Q1', 'Total_Trans_Amt',
-                 'Total_Trans_Ct', 'Total_Ct_Chng_Q4_Q1', 'Avg_Utilization_Ratio']
-
-    new_categoric_cols = [category + "_" +
-                          response for category in category_lst]
-
-    features = churn_df[keep_cols + new_categoric_cols]
-
-    x_train, x_test, y_train, y_test = train_test_split(
-        features, predictor, test_size=0.3, random_state=42)
+            "perform_feature_engineering: Error while creating train and test datasets: %s ", err)
 
     return x_train, x_test, y_train, y_test
 
 
-def classification_report_image(y_train,
-                                y_test,
-                                y_train_preds_lr,
-                                y_train_preds_rf,
-                                y_test_preds_lr,
-                                y_test_preds_rf):
+def classification_report_image(**predictions):
     '''
     produces classification report for training and testing results and stores report as image
     in images folder
     input:
-            y_train: training response values
-            y_test:  test response values
-            y_train_preds_lr: training predictions from logistic regression
-            y_train_preds_rf: training predictions from random forest
-            y_test_preds_lr: test predictions from logistic regression
-            y_test_preds_rf: test predictions from random forest
+            predictions dictionary that contains the following values:
+                 y_train: training response values
+                 y_test:  test response values
+                 y_train_preds_lr: training predictions from logistic regression
+                 y_train_preds_rf: training predictions from random forest
+                 y_test_preds_lr: test predictions from logistic regression
+                 y_test_preds_rf: test predictions from random forest
 
     output:
              None
     '''
-    pass
+    try:
+        models_lst = ["lr", "rf"]
+        for model in models_lst:
+            plt.figure(figsize=(8, 8))
+            plt.text(0.01, 1.25, 'Train '+model, {'fontsize': 10}, fontproperties = 'monospace')
+            plt.text(0.01, 0.05, str(classification_report(predictions["y_test"], predictions["y_test_preds_"+model])), 
+                    {'fontsize': 10}, fontproperties = 'monospace') 
+            plt.text(0.01, 0.6, 'Test '+model, {'fontsize': 10}, fontproperties = 'monospace')
+            plt.text(0.01, 0.7, str(classification_report(predictions["y_train"], predictions["y_train_preds_"+model])), 
+                    {'fontsize': 10}, fontproperties = 'monospace')
+            plt.axis('off')
+            plt.savefig(f'images/classification_report_{model}.jpg')
+    except Exception as err:
+        logging.error(
+            "classification_report_image: Error storing classification report %s ", err)
 
 
-def feature_importance_plot(model, X_data, output_pth):
+def feature_importance_plot(model, x_data, output_pth):
     '''
     creates and stores the feature importances in pth
     input:
@@ -260,7 +273,26 @@ def feature_importance_plot(model, X_data, output_pth):
     output:
              None
     '''
-    pass
+
+    try:
+        # Calculate feature importances
+        importances_lst = model.feature_importances_
+        # Sort feature importances in descending order
+        indices = np.argsort(importances_lst)[::-1]
+        # Rearrange feature names so they match the sorted feature importances
+        feature_lst = [x_data.columns[i] for i in indices]
+
+        plt.figure(figsize=(25, 20))
+        plt.title("Feature Importance")
+        plt.ylabel('Importance')
+        plt.bar(range(x_data.shape[1]), importances_lst[indices])
+        plt.xticks(range(x_data.shape[1]), feature_lst, rotation=90)
+        plt.savefig(output_pth + '/{}.jpg'.format("feature_importance"))
+        logging.info("feature_importance_plot: Stored feature_importance_plot")
+
+    except Exception as err:
+        logging.error(
+            "feature_importance plot: Error storing feature_importance plot %s ", err)
 
 
 
@@ -328,10 +360,6 @@ def train_models(x_train, x_test, y_train, y_test):
         logging.info("train_models: Models stored")
     except Exception as err:
         logging.error("train_models: Could not store models: %s", err)
-    
-
-    
- 
 
 
 if __name__ == "__main__":
@@ -345,3 +373,23 @@ if __name__ == "__main__":
 
    x_train, x_test, y_train, y_test = perform_feature_engineering(df, response)
    train_models(x_train, x_test, y_train, y_test)
+
+   rfc_model = joblib.load('models/rfc_model.pkl')
+   lr_model = joblib.load('./models/logistic_model.pkl')
+
+   feature_importance_plot(rfc_model, x_train, "images")
+
+   y_train_preds_rf = rfc_model.predict(x_train)
+   y_test_preds_rf = rfc_model.predict(x_test)
+
+   y_train_preds_lr = lr_model.predict(x_train)
+   y_test_preds_lr = lr_model.predict(x_test)
+
+   predictions = {"y_train_preds_rf": y_train_preds_rf,
+                  "y_test_preds_rf": y_test_preds_rf,
+                  "y_train_preds_lr": y_train_preds_lr,
+                  "y_test_preds_lr": y_test_preds_lr,
+                  "y_train": y_train,
+                  "y_test": y_test}
+
+   classification_report_image(**predictions)
