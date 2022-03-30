@@ -40,7 +40,7 @@ To run this project locally, follow the next steps:
 
 ## Contents of the project
 
-This project contains the following folders:
+This project contains the following:
 
 * **data:** It stores the data used for training the models.
 * **images:** It stores the plots that Churn library creates during EDA.
