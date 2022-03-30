@@ -8,6 +8,11 @@ root - INFO - Numeric plot stored: Customer_Age
 root - INFO - Numeric plot stored: Total_Trans_Ct
 root - INFO - Categoric plot stored: Marital_Status
 root - INFO - Correlation plot stored
+root - INFO - Testing perform_eda file Churn.jpg
+root - INFO - Testing perform_eda file Correlation_heatmap.jpg
+root - INFO - Testing perform_eda file Customer_Age.jpg
+root - INFO - Testing perform_eda file Marital_Status.jpg
+root - INFO - Testing perform_eda file Total_Trans_Ct.jpg
 root - INFO - Testing perform_eda: SUCCESS
 root - INFO - import_data: Loading CSV file SUCCESS
 root - INFO - Testing encoder_helper: loading data: SUCCESS

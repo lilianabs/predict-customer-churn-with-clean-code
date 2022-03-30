@@ -7,6 +7,8 @@ date: March 22, 2022
 import os
 import logging
 import joblib
+
+import constants
 import churn_library as cl
 
 logging.basicConfig(
@@ -21,7 +23,7 @@ def test_import(import_data):
     test data import - this example is completed for you to assist with the other test functions
     '''
     try:
-        churn_df = import_data("./data/bank_data.csv")
+        churn_df = import_data(constants.DATA_FILE)
         logging.info("Testing import_data: SUCCESS")
     except FileNotFoundError as err:
         logging.error("Testing import_eda: The file wasn't found")
@@ -41,7 +43,7 @@ def test_eda(perform_eda):
     test perform eda function
     '''
     try:
-        churn_df = cl.import_data("./data/bank_data.csv")
+        churn_df = cl.import_data(constants.DATA_FILE)
         logging.info("Testing perform_eda loading data: SUCCESS")
     except FileNotFoundError as err:
         logging.error("Testing perform_eda: The file wasn't found")
@@ -49,18 +51,15 @@ def test_eda(perform_eda):
 
     try:
         perform_eda(churn_df)
-        images_folder = "images/"
-        images_files_lst = ["Churn.jpg", "Correlation_heatmap.jpg",
-                            "Customer_Age.jpg", "Marital_Status.jpg",
-                            "Total_Trans_Ct.jpg"]
 
-        for file in images_files_lst:
-            assert os.path.isfile(images_folder + file)
+        for file in constants.IMAGES_FILES_LST:
+            logging.info("Testing perform_eda file %s", file)
+            assert os.path.isfile(constants.IMAGES_FOLDER + file)
 
         logging.info("Testing perform_eda: SUCCESS")
 
     except AssertionError as err:
-        logging.error("Testing perform_eda: image file does not exist")
+        logging.error("Testing perform_eda: image file does not exist %s", err)
         raise err
 
 
@@ -69,23 +68,21 @@ def test_encoder_helper(encoder_helper):
     test encoder helper
     '''
     try:
-        churn_df = cl.import_data("./data/bank_data.csv")
+        churn_df = cl.import_data(constants.DATA_FILE)
         logging.info("Testing encoder_helper: loading data: SUCCESS")
     except FileNotFoundError as err:
         logging.error("Testing encoder_helper: The file wasn't found")
         raise err
 
-    category_lst = ['Gender', 'Education_Level', 'Marital_Status', 'Income_Category',
-                    'Card_Category']
-    response = "Churn"
-
     try:
         # Get number of original columns
         num_cols_churn_df = churn_df.shape[1]
-        churn_df = encoder_helper(churn_df, category_lst, response)
+        churn_df = encoder_helper(churn_df, constants.CATEGORY_LST,
+                                  constants.RESPONSE)
 
         # Check that we have all of the new categoric columns and the response
-        assert churn_df.shape[1] == (num_cols_churn_df + len(category_lst) + 1)
+        assert churn_df.shape[1] == (
+            num_cols_churn_df + len(constants.CATEGORY_LST) + 1)
 
         logging.info(
             "Testing encoder_helper: correct number of columns: SUCCESS")
@@ -100,7 +97,7 @@ def test_perform_feature_engineering(perform_feature_engineering):
     test perform_feature_engineering
     '''
     try:
-        churn_df = cl.import_data("./data/bank_data.csv")
+        churn_df = cl.import_data(constants.DATA_FILE)
         logging.info(
             "Testing perform_feature_engineering: loading data: SUCCESS")
     except FileNotFoundError as err:
@@ -108,11 +105,9 @@ def test_perform_feature_engineering(perform_feature_engineering):
             "Testing perform_feature_engineering: The file wasn't found")
         raise err
 
-    response = "Churn"
-
     try:
         x_train, x_test, y_train, y_test = perform_feature_engineering(
-            churn_df, response)
+            churn_df, constants.RESPONSE)
 
         assert x_train.shape[0] > 0
         assert x_train.shape[1] > 0
@@ -136,7 +131,7 @@ def test_train_models(train_models):
     test train_models
     '''
     try:
-        churn_df = cl.import_data("./data/bank_data.csv")
+        churn_df = cl.import_data(constants.DATA_FILE)
         logging.info(
             "Testing train_models: loading data: SUCCESS")
     except FileNotFoundError as err:
@@ -144,23 +139,18 @@ def test_train_models(train_models):
             "Testing train_models: The file wasn't found")
         raise err
 
-    response = "Churn"
-
     try:
         x_train, x_test, y_train, y_test = cl.perform_feature_engineering(
-            churn_df, response)
+            churn_df, constants.RESPONSE)
 
         train_models(x_train, x_test, y_train, y_test)
 
         # Check the ROC curve plot was stored
-        images_folder = "images/"
-        assert os.path.isfile(images_folder + "roc_curve.jpg")
+        assert os.path.isfile(constants.IMAGES_FOLDER + "roc_curve.jpg")
 
         # Check the models were stored
-        models_folder = "models/"
-        models_lst = ["logistic_model.pkl", "rfc_model.pkl"]
-        for model in models_lst:
-            assert os.path.isfile(models_folder + model)
+        for model in constants.MODELS_FILES_LST:
+            assert os.path.isfile(constants.MODELS_FOLDER + model)
 
         logging.info(
             "Testing train_models: created models and stored roc curve plot: SUCCESS")
@@ -175,7 +165,7 @@ def test_feature_importance_plot(feature_importance_plot):
     test feature_importance_plot
     '''
     try:
-        churn_df = cl.import_data("./data/bank_data.csv")
+        churn_df = cl.import_data(constants.DATA_FILE)
         logging.info(
             "Testing feature_importance_plot: loading data: SUCCESS")
     except FileNotFoundError as err:
@@ -183,24 +173,22 @@ def test_feature_importance_plot(feature_importance_plot):
             "Testing feature_importance_plot: The file wasn't found")
         raise err
 
-    response = "Churn"
-
     try:
         x_train, x_test, y_train, y_test = cl.perform_feature_engineering(
-            churn_df, response)
+            churn_df, constants.RESPONSE)
 
         # Load the model
-        models_folder = "models/"
-        rfc_model = joblib.load(models_folder + 'rfc_model.pkl')
+        rfc_model = joblib.load(constants.MODELS_FOLDER + 'rfc_model.pkl')
 
         # Create the feature importance model
-        feature_importance_plot(rfc_model, x_train, "images")
+        feature_importance_plot(rfc_model, x_train, constants.IMAGES_FOLDER)
         logging.info(
             "Testing feature_importance_plot: created feature importance plot: SUCCESS")
 
         # Check the feature importance plot was stored
-        images_folder = "images/"
-        assert os.path.isfile(images_folder + "feature_importance.jpg")
+        assert os.path.isfile(
+            constants.IMAGES_FOLDER +
+            "feature_importance.jpg")
 
         logging.info(
             "Testing feature_importance_plot: stored feature importance plot: SUCCESS")
@@ -210,15 +198,12 @@ def test_feature_importance_plot(feature_importance_plot):
         raise err
 
 
-
-    pass
-
 def test_classification_report_image(classification_report_image):
     '''
     test classification_report_image
     '''
     try:
-        churn_df = cl.import_data("./data/bank_data.csv")
+        churn_df = cl.import_data(constants.DATA_FILE)
         logging.info(
             "Testing classification_report_image: loading data: SUCCESS")
     except FileNotFoundError as err:
@@ -226,16 +211,13 @@ def test_classification_report_image(classification_report_image):
             "Testing classification_report_image: The file wasn't found")
         raise err
 
-    response = "Churn"
-
     try:
         x_train, x_test, y_train, y_test = cl.perform_feature_engineering(
-            churn_df, response)
+            churn_df, constants.RESPONSE)
 
         # Load the model
-        models_folder = "models/"
-        rfc_model = joblib.load(models_folder + 'rfc_model.pkl')
-        lr_model = joblib.load(models_folder + 'logistic_model.pkl')
+        rfc_model = joblib.load(constants.MODELS_FOLDER + 'rfc_model.pkl')
+        lr_model = joblib.load(constants.MODELS_FOLDER + 'logistic_model.pkl')
 
         y_train_preds_rf = rfc_model.predict(x_train)
         y_test_preds_rf = rfc_model.predict(x_test)
@@ -253,17 +235,19 @@ def test_classification_report_image(classification_report_image):
         classification_report_image(**predictions)
 
         # Check the classification report images were stored
-        images_folder = "images/"
-        assert os.path.isfile(images_folder + "classification_report_lr.jpg")
-        assert os.path.isfile(images_folder + "classification_report_rf.jpg")
+        assert os.path.isfile(
+            constants.IMAGES_FOLDER +
+            "classification_report_lr.jpg")
+        assert os.path.isfile(
+            constants.IMAGES_FOLDER +
+            "classification_report_rf.jpg")
 
         logging.info(
             "Testing classification_report_image: stored classification report images: SUCCESS")
     except AssertionError as err:
         logging.error(
-            "Testing classification_report_image: error creating classification report image %s", err)
+            "Testing classification_report_image: error classification report image %s", err)
         raise err
-
 
 
 if __name__ == "__main__":

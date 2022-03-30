@@ -10,14 +10,14 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import normalize
-import shap
 import joblib
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 sns.set()
+
+import constants as constants_project
 
 
 logging.basicConfig(
@@ -57,7 +57,10 @@ def plot_numeric_feature(feature):
     plt.figure(figsize=(20, 10))
     sns.histplot(feature)
     plt.title(str(feature.name))
-    plt.savefig('images/{}.jpg'.format(feature.name))
+    plt.savefig(
+        constants_project.IMAGES_FOLDER +
+        '{}.jpg'.format(
+            feature.name))
 
 
 def plot_categoric_feature(feature):
@@ -73,7 +76,10 @@ def plot_categoric_feature(feature):
     plt.figure(figsize=(20, 10))
     feature.value_counts('normalize').plot(kind='bar')
     plt.title(str(feature.name))
-    plt.savefig('images/{}.jpg'.format(feature.name))
+    plt.savefig(
+        constants_project.IMAGES_FOLDER +
+        '{}.jpg'.format(
+            feature.name))
 
 
 def plot_correlation(churn_df):
@@ -89,7 +95,7 @@ def plot_correlation(churn_df):
     plt.figure(figsize=(20, 10))
     sns.heatmap(churn_df.corr(), annot=False, cmap='Dark2_r', linewidths=2)
     plt.title('Correlation Heatmap')
-    plt.savefig('images/Correlation_heatmap.jpg')
+    plt.savefig(constants_project.IMAGES_FOLDER + 'Correlation_heatmap.jpg')
 
 
 def perform_eda(churn_df):
@@ -103,17 +109,15 @@ def perform_eda(churn_df):
     '''
     try:
         # Add Churn column to the dataframe
-        churn_df['Churn'] = churn_df['Attrition_Flag'].apply(
+        churn_df[constants_project.RESPONSE] = churn_df['Attrition_Flag'].apply(
             lambda val: 0 if val == "Existing Customer" else 1)
         logging.info("perform_eda: Added Churn column to dataframe")
-    except Exception as err:
-        logging.error("perform_eda: Could not add Churn column to dataframe: %s", err)
-
-    numeric_features_lst = ["Churn", "Customer_Age", "Total_Trans_Ct"]
-    categoric_features_lst = ["Marital_Status"]
+    except AttributeError as err:
+        logging.error(
+            "perform_eda: Could not add Churn column to dataframe: %s", err)
 
     # Plot numeric columns and save images
-    for feature in numeric_features_lst:
+    for feature in constants_project.NUMERIC_FEATURES_LST:
         try:
             plot_numeric_feature(churn_df[feature])
             logging.info("Numeric plot stored: %s", feature)
@@ -121,7 +125,7 @@ def perform_eda(churn_df):
             logging.error("Clould not store numeric plot: %s", feature)
 
     # Plot categoric columns and save images
-    for feature in categoric_features_lst:
+    for feature in constants_project.CATEGORIC_FEATURES_LST:
         try:
             plot_categoric_feature(churn_df[feature])
             logging.info("Categoric plot stored: %s", feature)
@@ -155,7 +159,7 @@ def encoder_helper(churn_df, category_lst, response):
         churn_df[response] = churn_df['Attrition_Flag'].apply(
             lambda val: 0 if val == "Existing Customer" else 1)
         logging.info("encoder_helper: Added Churn column to dataframe")
-    except Exception as err:
+    except AttributeError as err:
         logging.error(
             "encoder_helper: Could not add Churn column to dataframe: %s", err)
 
@@ -169,7 +173,7 @@ def encoder_helper(churn_df, category_lst, response):
                 "encoder_helper: Added new categorical column %s",
                 category +
                 response)
-        except Exception as err:
+        except AttributeError as err:
             logging.error(
                 "encoder_helper: Could not add categorical column: %s",
                 category +
@@ -201,28 +205,24 @@ def perform_feature_engineering(churn_df, response):
 
         predictor = churn_df[response]
 
-        category_lst = ['Gender', 'Education_Level', 'Marital_Status', 'Income_Category',
-                        'Card_Category']
-
-        churn_df = encoder_helper(churn_df, category_lst, response)
-
-        keep_cols = ['Customer_Age', 'Dependent_count', 'Months_on_book',
-                     'Total_Relationship_Count', 'Months_Inactive_12_mon',
-                     'Contacts_Count_12_mon', 'Credit_Limit', 'Total_Revolving_Bal',
-                     'Avg_Open_To_Buy', 'Total_Amt_Chng_Q4_Q1', 'Total_Trans_Amt',
-                     'Total_Trans_Ct', 'Total_Ct_Chng_Q4_Q1', 'Avg_Utilization_Ratio']
+        churn_df = encoder_helper(
+            churn_df,
+            constants_project.CATEGORIES_FEATURE_ENG_LST,
+            response)
 
         new_categoric_cols = [category + "_" +
-                              response for category in category_lst]
+                              response for category in constants_project.CATEGORIES_FEATURE_ENG_LST]
 
-        features = churn_df[keep_cols + new_categoric_cols]
+        features = churn_df[constants_project.COLS_TRAINING_LST +
+                            new_categoric_cols]
 
         x_train, x_test, y_train, y_test = train_test_split(
             features, predictor, test_size=0.3, random_state=42)
 
-        logging.info("perform_feature_engineering: Created train and test datasets")
+        logging.info(
+            "perform_feature_engineering: Created train and test datasets")
 
-    except Exception as err:
+    except AttributeError as err:
         logging.error(
             "perform_feature_engineering: Error while creating train and test datasets: %s ", err)
 
@@ -246,20 +246,25 @@ def classification_report_image(**predictions):
              None
     '''
     try:
-        models_lst = ["lr", "rf"]
-        for model in models_lst:
+        for model in constants_project.MODELS_LST:
             plt.figure(figsize=(8, 8))
-            plt.text(0.01, 1.25, 'Train '+model, {'fontsize': 10}, fontproperties = 'monospace')
-            plt.text(0.01, 0.05, str(classification_report(predictions["y_test"], predictions["y_test_preds_"+model])), 
-                    {'fontsize': 10}, fontproperties = 'monospace') 
-            plt.text(0.01, 0.6, 'Test '+model, {'fontsize': 10}, fontproperties = 'monospace')
-            plt.text(0.01, 0.7, str(classification_report(predictions["y_train"], predictions["y_train_preds_"+model])), 
-                    {'fontsize': 10}, fontproperties = 'monospace')
+            plt.text(0.01, 1.25, 'Train ' +
+                     model, {'fontsize': 10}, fontproperties='monospace')
+            plt.text(0.01, 0.05, str(classification_report(predictions["y_test"],
+                     predictions["y_test_preds_" + model])),
+                     {'fontsize': 10}, fontproperties='monospace')
+            plt.text(0.01, 0.6, 'Test ' +
+                     model, {'fontsize': 10}, fontproperties='monospace')
+            plt.text(0.01, 0.7, str(classification_report(predictions["y_train"],
+                                                          predictions["y_train_preds_" + model])),
+                     {'fontsize': 10}, fontproperties='monospace')
             plt.axis('off')
-            plt.savefig(f'images/classification_report_{model}.jpg')
+            plt.savefig(
+                constants_project.IMAGES_FOLDER +
+                f'classification_report_{model}.jpg')
     except Exception as err:
         logging.error(
-            "classification_report_image: Error storing classification report %s ", err)
+            "classification_report_image: Error storing classification rep %s ", err)
 
 
 def feature_importance_plot(model, x_data, output_pth):
@@ -287,13 +292,12 @@ def feature_importance_plot(model, x_data, output_pth):
         plt.ylabel('Importance')
         plt.bar(range(x_data.shape[1]), importances_lst[indices])
         plt.xticks(range(x_data.shape[1]), feature_lst, rotation=90)
-        plt.savefig(output_pth + '/{}.jpg'.format("feature_importance"))
+        plt.savefig(output_pth + '{}.jpg'.format("feature_importance"))
         logging.info("feature_importance_plot: Stored feature_importance_plot")
 
     except Exception as err:
         logging.error(
             "feature_importance plot: Error storing feature_importance plot %s ", err)
-
 
 
 def plot_roc(lrc, cv_rfc, x_test, y_test):
@@ -310,10 +314,15 @@ def plot_roc(lrc, cv_rfc, x_test, y_test):
     '''
     plt.figure(figsize=(20, 10))
     lrc_plot = plot_roc_curve(lrc, x_test, y_test)
-    ax = plt.gca()
-    rfc_disp = plot_roc_curve(cv_rfc.best_estimator_, x_test, y_test, ax=ax, alpha=0.8)
+    axis = plt.gca()
+    rfc_disp = plot_roc_curve(
+        cv_rfc.best_estimator_,
+        x_test,
+        y_test,
+        ax=axis,
+        alpha=0.8)
     plt.title("ROC Curve model comparison")
-    plt.savefig('images/{}.jpg'.format("roc_curve"))
+    plt.savefig(constants_project.IMAGES_FOLDER + "roc_curve.jpg")
 
 
 def train_models(x_train, x_test, y_train, y_test):
@@ -331,11 +340,11 @@ def train_models(x_train, x_test, y_train, y_test):
         rfc = RandomForestClassifier(random_state=42)
         lrc = LogisticRegression(solver='liblinear')
 
-        param_grid = { 
+        param_grid = {
             'n_estimators': [200, 500],
             'max_features': ['auto', 'sqrt'],
-            'max_depth' : [4,5,100],
-            'criterion' :['gini', 'entropy']
+            'max_depth': [4, 5, 100],
+            'criterion': ['gini', 'entropy']
         }
 
         cv_rfc = GridSearchCV(estimator=rfc, param_grid=param_grid, cv=5)
@@ -355,41 +364,14 @@ def train_models(x_train, x_test, y_train, y_test):
         logging.error("Could not store ROC curve plot: %s", err)
 
     try:
-        joblib.dump(cv_rfc.best_estimator_, 'models/rfc_model.pkl')
-        joblib.dump(lrc, 'models/logistic_model.pkl')
+        joblib.dump(
+            cv_rfc.best_estimator_,
+            constants_project.MODELS_FOLDER +
+            'rfc_model.pkl')
+        joblib.dump(
+            lrc,
+            constants_project.MODELS_FOLDER +
+            'logistic_model.pkl')
         logging.info("train_models: Models stored")
     except Exception as err:
         logging.error("train_models: Could not store models: %s", err)
-
-
-if __name__ == "__main__":
-   df = import_data("data/bank_data.csv")
-   perform_eda(df)
-   category_lst = ['Gender', 'Education_Level', 'Marital_Status', 'Income_Category',
-                    'Card_Category'
-   ]
-   response = "Churn"
-   df = encoder_helper(df, category_lst, response)
-
-   x_train, x_test, y_train, y_test = perform_feature_engineering(df, response)
-   train_models(x_train, x_test, y_train, y_test)
-
-   rfc_model = joblib.load('models/rfc_model.pkl')
-   lr_model = joblib.load('./models/logistic_model.pkl')
-
-   feature_importance_plot(rfc_model, x_train, "images")
-
-   y_train_preds_rf = rfc_model.predict(x_train)
-   y_test_preds_rf = rfc_model.predict(x_test)
-
-   y_train_preds_lr = lr_model.predict(x_train)
-   y_test_preds_lr = lr_model.predict(x_test)
-
-   predictions = {"y_train_preds_rf": y_train_preds_rf,
-                  "y_test_preds_rf": y_test_preds_rf,
-                  "y_train_preds_lr": y_train_preds_lr,
-                  "y_test_preds_lr": y_test_preds_lr,
-                  "y_train": y_train,
-                  "y_test": y_test}
-
-   classification_report_image(**predictions)
