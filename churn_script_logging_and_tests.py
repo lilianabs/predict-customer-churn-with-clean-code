@@ -210,9 +210,6 @@ def test_feature_importance_plot(feature_importance_plot):
         raise err
 
 
-
-    pass
-
 def test_classification_report_image(classification_report_image):
     '''
     test classification_report_image
@@ -261,10 +258,8 @@ def test_classification_report_image(classification_report_image):
             "Testing classification_report_image: stored classification report images: SUCCESS")
     except AssertionError as err:
         logging.error(
-            "Testing classification_report_image: error creating classification report image %s", err)
+            "Testing classification_report_image: error classification report image %s", err)
         raise err
-
-
 
 if __name__ == "__main__":
     test_import(cl.import_data)
